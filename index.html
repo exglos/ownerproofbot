@@ -4,20 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ethereum Address Verification</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.umd.min.js"></script>
+    <!-- Fixed version of ethers.js -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
 </head>
 <body>
     <header>
         <h1>Verify Your Ethereum Address</h1>
-        <button id="connectWallet">Connect Wallet</button>
-        <button id="generateMsg" style="display:none;">Generate Message & Sign</button>
+        <button id="openLink">Open Verify Page</button>
     </header>
-    
-    <section id="signMessage" style="display:none;">
-        <h2>Generated Message</h2>
-        <p id="message"></p>
-        <p id="signature"></p>
-    </section>
     
     <section id="verifySignature">
         <h2>Verify Signature</h2>
@@ -29,37 +23,11 @@
     </section>
 
     <script>
-        let signer;
-
-        async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                document.getElementById('generateMsg').style.display = 'block';
-                alert('Wallet connected successfully!');
-            } else {
-                alert('Please install MetaMask or another Web3 provider.');
-            }
-        }
-
-        document.getElementById('connectWallet').onclick = connectWallet;
-
-        document.getElementById('generateMsg').onclick = async function () {
-            if (!signer) {
-                alert('Please connect your wallet first.');
-                return;
-            }
-            const message = 'Verify that you own this address: ' + Math.random().toString(36).substring(2);
-            const signature = await signer.signMessage(message);
-            
-            // Display the generated message and signature
-            document.getElementById('message').innerText = message;
-            document.getElementById('signature').innerText = 'Signature: ' + signature;
-
-            // Show the sign message section
-            document.getElementById('signMessage').style.display = 'block';
-        }
+        // Function to open the verify.html page on exglos.com
+        document.getElementById('openLink').onclick = function () {
+            const verifyPage = "https://exglos.com/ownerproofbot/verify.html";
+            window.open(verifyPage, '_blank');
+        };
 
         document.getElementById('verifyBtn').onclick = async function () {
             const message = document.getElementById('inputMessage').value;
