@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Ethereum Signature</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Ethereum Signature Verification</h1>
+    </header>
+
+    <section>
+        <button id="connectAndSignBtn">Connect Wallet & Sign Message</button>
+        <h2>Generated Message</h2>
+        <p id="message"></p>
+        <h2>Signature</h2>
+        <p id="signature"></p>
+        <p>Signer's Address: <span id="signerAddress"></span></p>
+        <p id="error" style="color:red;"></p>
+    </section>
+
+    <script>
+        let signer;
+
+        document.getElementById('connectAndSignBtn').onclick = async function () {
+            // Connect to wallet
+            if (typeof window.ethereum === 'undefined') {
+                alert('Please install MetaMask or another Web3 provider.');
+                return;
+            }
+
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            
+            // Generate random message
+            const message = 'Verify that you own this address: ' + Math.random().toString(36).substring(2);
+            document.getElementById('message').innerText = message;
+
+            // Sign the message
+            try {
+                const signature = await signer.signMessage(message);
+                document.getElementById('signature').innerText = 'Signature: ' + signature;
+
+                // Get the signer's address
+                const signerAddress = await signer.getAddress();
+                document.getElementById('signerAddress').innerText = signerAddress;
+                document.getElementById('error').innerText = ''; // Clear any previous error
+            } catch (error) {
+                document.getElementById('error').innerText = 'Signing failed: ' + error.message;
+                document.getElementById('signature').innerText = ''; // Clear previous signature
+                document.getElementById('signerAddress').innerText = ''; // Clear previous address
+            }
+        };
+    </script>
+</body>
+</html>
