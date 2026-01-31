@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum Address Verification</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Verify Your Ethereum Address</h1>
+        <button id="connectWallet">Connect Wallet</button>
+        <button id="generateMsg" style="display:none;">Generate Message & Sign</button>
+    </header>
+    
+    <section id="signMessage" style="display:none;">
+        <h2>Generated Message</h2>
+        <p id="message"></p>
+        <p id="signature"></p>
+    </section>
+    
+    <section id="verifySignature">
+        <h2>Verify Signature</h2>
+        <input type="text" id="inputMessage" placeholder="Enter message" />
+        <input type="text" id="inputSignature" placeholder="Enter signature" />
+        <button id="verifyBtn">Verify</button>
+        <p>Signer's Address: <span id="signerAddress"></span></p>
+        <p id="error" style="color:red;"></p>
+    </section>
+
+    <script>
+        let signer;
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                document.getElementById('generateMsg').style.display = 'block';
+                alert('Wallet connected successfully!');
+            } else {
+                alert('Please install MetaMask or another Web3 provider.');
+            }
+        }
+
+        document.getElementById('connectWallet').onclick = connectWallet;
+
+        document.getElementById('generateMsg').onclick = async function () {
+            if (!signer) {
+                alert('Please connect your wallet first.');
+                return;
+            }
+            const message = 'Verify that you own this address: ' + Math.random().toString(36).substring(2);
+            const signature = await signer.signMessage(message);
+            
+            // Display the generated message and signature
+            document.getElementById('message').innerText = message;
+            document.getElementById('signature').innerText = 'Signature: ' + signature;
+
+            // Show the sign message section
+            document.getElementById('signMessage').style.display = 'block';
+        }
+
+        document.getElementById('verifyBtn').onclick = async function () {
+            const message = document.getElementById('inputMessage').value;
+            const signature = document.getElementById('inputSignature').value;
+
+            try {
+                // Verify the message and get the signer address
+                const signerAddress = ethers.utils.verifyMessage(message, signature);
+                document.getElementById('signerAddress').innerText = signerAddress;
+                document.getElementById('error').innerText = ''; // Clear any previous error
+            } catch (error) {
+                document.getElementById('error').innerText = 'Verification failed: ' + error.message;
+                document.getElementById('signerAddress').innerText = ''; // Clear previous address
+            }
+        }
+    </script>
+</body>
+</html>
